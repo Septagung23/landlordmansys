@@ -6,8 +6,9 @@ export default function AppShell({ children }: PropsWithChildren) {
       <div className="phone-shell">
         <header className="top-bar">
           <div className="brand-block">
-            <strong>MitraTel</strong>
-            <span>landlord management</span>
+            <a href="/">
+              <strong>Mitratel</strong>
+            </a>
           </div>
           <button className="menu-btn" aria-label="menu">
             ☰
