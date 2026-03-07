@@ -16,8 +16,7 @@ export default function SiteUpdatePage() {
 
         <article className="card form-card">
           <div className="card-head">
-            <h2>SITE PROFILE</h2>
-            <span>⋮</span>
+            <h2>EDIT SITE PROFILE</h2>
           </div>
 
           <form className="form-grid">
@@ -26,8 +25,8 @@ export default function SiteUpdatePage() {
             <input placeholder="Harga baru" defaultValue={site.newPricePerYear} />
             <input placeholder="Jangka waktu sewa baru" defaultValue="5 tahun" />
             <div className="split-inputs">
-              <input placeholder="Growth" defaultValue={site.growth} />
-              <input placeholder="IRR" defaultValue="14%" />
+              <input placeholder="Growth" disabled defaultValue={site.newPricePerYear/site.existingPricePerYear * 0.1} />
+              <input placeholder="IRR" disabled defaultValue="14%" />
             </div>
             <textarea placeholder="Histori nego" defaultValue="Diskusi awal selesai, menunggu approval final." />
           </form>

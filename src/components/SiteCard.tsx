@@ -14,7 +14,7 @@ export default function SiteCard({ site }: SiteCardProps) {
         <p className="site-code">
           {site.code} | {site.legacyCode}
         </p>
-        <p className="site-pic">PIC: {site.pic}</p>
+        <p className="site-pic">PIC: {site.negotiator}</p>
       </div>
     </Link>
   );

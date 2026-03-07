@@ -17,7 +17,9 @@ export default function SiteProfilePage() {
         <article className="card profile-card">
           <div className="card-head">
             <h2>SITE PROFILE</h2>
-            <span>⋮</span>
+            <Link to={`/site/${site.id}/update`}>
+             <span>Edit</span>
+            </Link>
           </div>
 
           <div className="profile-grid">
@@ -30,9 +32,9 @@ export default function SiteProfilePage() {
           </div>
         </article>
 
-        <Link className="primary-btn" to={`/site/${site.id}/update`}>
+        {/* <Link className="primary-btn" to={`/site/${site.id}/update`}>
           CONTINUE TO EDIT
-        </Link>
+        </Link> */}
       </section>
     </AppShell>
   );

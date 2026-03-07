@@ -41,7 +41,7 @@ body {
 
 .brand-block {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   line-height: 1.1;
 }
 
@@ -213,7 +213,13 @@ body {
   font-size: 0.85rem;
 }
 
-.brand-block a {
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+a {
   text-decoration: none;
   color: #111;
 }

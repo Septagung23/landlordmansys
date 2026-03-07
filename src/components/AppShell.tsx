@@ -1,4 +1,6 @@
 import type { PropsWithChildren } from 'react';
+import logo from '../assets/logo.png';
+import {Menu} from 'lucide-react'
 
 export default function AppShell({ children }: PropsWithChildren) {
   return (
@@ -7,12 +9,15 @@ export default function AppShell({ children }: PropsWithChildren) {
         <header className="top-bar">
           <div className="brand-block">
             <a href="/">
-              <strong>Mitratel</strong>
+              <div className='logo'>
+                <img src={logo} width={20}/>
+                <strong>LLMS</strong>
+              </div>
             </a>
           </div>
-          <button className="menu-btn" aria-label="menu">
-            ☰
-          </button>
+          <a>
+            <Menu />
+          </a>
         </header>
         <main>{children}</main>
       </div>
