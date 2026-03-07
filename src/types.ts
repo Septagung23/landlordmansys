@@ -6,8 +6,9 @@ export type Site = {
   negotiator: string;
   towerType: string;
   province: string;
-  existingPricePerYear: Number;
-  newPricePerYear: Number;
+  existingPricePerYear: number;
+  newPricePerYear: number;
   contractEnd: string;
   coordinates: string;
+  negotiationHistory: string;
 };

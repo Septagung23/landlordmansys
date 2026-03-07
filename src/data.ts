@@ -12,7 +12,8 @@ export const sites: Site[] = [
     existingPricePerYear: 125000000,
     newPricePerYear: 140000000,
     contractEnd: '2027-08-31',
-    coordinates: '-6.2088, 106.8456'
+    coordinates: '-6.2088, 106.8456',
+    negotiationHistory: 'Diskusi awal selesai, menunggu approval final.'
   },
   {
     id: 'site2',
@@ -25,7 +26,8 @@ export const sites: Site[] = [
     existingPricePerYear: 87000000,
     newPricePerYear: 95000000,
     contractEnd: '2026-12-12',
-    coordinates: '-6.9039, 107.6186'
+    coordinates: '-6.9039, 107.6186',
+    negotiationHistory: 'Diskusi awal selesai, menunggu approval final.'
   },
   {
     id: 'site3',
@@ -38,7 +40,8 @@ export const sites: Site[] = [
     existingPricePerYear: 73000000,
     newPricePerYear: 82000000,
     contractEnd: '2025-10-01',
-    coordinates: '-7.2575, 112.7521'
+    coordinates: '-7.2575, 112.7521',
+    negotiationHistory: 'Diskusi awal selesai, menunggu approval final.'
   }
 ];
 
@@ -50,5 +53,6 @@ export const profileFields: Array<{ label: string; key: keyof Site }> = [
   { label: 'Tower Type', key: 'towerType' },
   { label: 'Contract End', key: 'contractEnd' },
   { label: 'Landlord', key: 'll' },
-  { label: 'Lat/Long', key: 'coordinates' }
+  { label: 'Lat/Long', key: 'coordinates' },
+  { label: 'Negotiation History', key: 'negotiationHistory' }
 ];
