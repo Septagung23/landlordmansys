@@ -6,7 +6,6 @@ export default function SiteListPage() {
   return (
     <AppShell>
       <section className="content">
-        <h1 className="page-title">SITE LIST</h1>
         <div className="list-stack">
           {sites.map((site) => (
             <SiteCard key={site.id} site={site} />

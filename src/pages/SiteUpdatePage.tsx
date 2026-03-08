@@ -1,19 +1,50 @@
-import { FormEvent, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import AppShell from '../components/AppShell';
-import { sites } from '../data';
+import type { Site } from '../types';
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
 export default function SiteUpdatePage() {
   const { siteId } = useParams();
-  const site = sites.find((item) => item.id === siteId) ?? sites[0];
+  const navigate = useNavigate();
 
-  const [existingPricePerYear, setExistingPricePerYear] = useState(site.existingPricePerYear);
-  const [newPricePerYear, setNewPricePerYear] = useState(site.newPricePerYear);
-  const [negotiationHistory, setNegotiationHistory] = useState(site.negotiationHistory);
+  const [site, setSite] = useState<Site | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [existingPricePerYear, setExistingPricePerYear] = useState(0);
+  const [newPricePerYear, setNewPricePerYear] = useState(0);
+  const [negotiationHistory, setNegotiationHistory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchSite() {
+      try {
+        setIsLoading(true);
+        setLoadError(null);
+        const response = await fetch(`${apiBaseUrl}/api/sites/${siteId}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch site data.');
+        }
+
+        const siteData: Site = await response.json();
+        setSite(siteData);
+        setExistingPricePerYear(siteData.existingPricePerYear);
+        setNewPricePerYear(siteData.newPricePerYear);
+        setNegotiationHistory(siteData.negotiationHistory);
+      } catch (error) {
+        setLoadError('Failed to load site data. Please check backend server status.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (siteId) {
+      fetchSite();
+    }
+  }, [siteId]);
 
   const growth = useMemo(() => {
     if (existingPricePerYear === 0) {
@@ -28,7 +59,7 @@ export default function SiteUpdatePage() {
     setStatusMessage(null);
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/sites/${site.id}/lease`, {
+      const response = await fetch(`${apiBaseUrl}/api/sites/${siteId}/lease`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -45,6 +76,7 @@ export default function SiteUpdatePage() {
       }
 
       setStatusMessage('Lease data updated successfully.');
+      navigate(`/site/${siteId}`);
     } catch {
       setStatusMessage('Failed to update lease data. Please check backend server status.');
     } finally {
@@ -55,50 +87,67 @@ export default function SiteUpdatePage() {
   return (
     <AppShell>
       <section className="content">
-        <h1 className="page-title smaller">{site.id.toUpperCase()}</h1>
-        <p className="subtitle">
-          {site.code} | {site.legacyCode}
-        </p>
+        {isLoading && <p>Loading site data...</p>}
+        {loadError && <p style={{ color: 'red' }}>{loadError}</p>}
+        {site && (
+          <>
+            <h1 className="page-title smaller">{site.id.toUpperCase()}</h1>
+            <p className="subtitle">
+              {site.code} | {site.legacyCode}
+            </p>
 
-        <article className="card form-card">
-          <div className="card-head">
-            <h2>EDIT SITE PROFILE</h2>
-          </div>
+            <article className="card form-card">
+              <div className="card-head">
+                <h2>EDIT SITE PROFILE</h2>
+              </div>
 
-          <form className="form-grid" onSubmit={handleSubmit}>
-            <input placeholder="Tanggal expired" defaultValue={site.contractEnd} />
-            <input
-              placeholder="Harga existing"
-              type="number"
-              value={existingPricePerYear}
-              onChange={(event) => setExistingPricePerYear(Number(event.target.value))}
-            />
-            <input
-              placeholder="Harga baru"
-              type="number"
-              value={newPricePerYear}
-              onChange={(event) => setNewPricePerYear(Number(event.target.value))}
-            />
-            <input placeholder="Jangka waktu sewa baru" defaultValue="5 tahun" />
-            <div className="split-inputs">
-              <input placeholder="Growth" disabled value={growth} />
-              <input placeholder="IRR" disabled defaultValue="14%" />
-            </div>
-            <textarea
-              placeholder="Histori nego"
-              value={negotiationHistory}
-              onChange={(event) => setNegotiationHistory(event.target.value)}
-            />
-            <button className="primary-btn" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
-            </button>
-            {statusMessage ? <p>{statusMessage}</p> : null}
-          </form>
-        </article>
+              <form className="form-grid" onSubmit={handleSubmit}>
+                <label htmlFor="Tanggal expired">Tanggal expired</label>
+                <input placeholder="Tanggal expired" defaultValue={site.contractEnd} />
+                <label htmlFor="Harga existing">Harga existing</label>
+                <input
+                  placeholder="Harga existing"
+                  type="number"
+                  value={existingPricePerYear}
+                  onChange={(event) => setExistingPricePerYear(Number(event.target.value))}
+                />
+                <label htmlFor="Harga baru">Harga baru</label>
+                <input
+                  placeholder="Harga baru"
+                  type="number"
+                  value={newPricePerYear}
+                  onChange={(event) => setNewPricePerYear(Number(event.target.value))}
+                />
+                <label htmlFor="Jangka waktu sewa baru">Jangka waktu sewa baru</label>
+                <input placeholder="Jangka waktu sewa baru" defaultValue="5 tahun" />
+                <div className="split-inputs">
+                  <div>
+                    <label htmlFor="Growth">Growth</label>
+                    <input placeholder="Growth" disabled value={growth} />
+                  </div>
+                  <div>
+                    <label htmlFor="IRR">IRR</label>
+                    <input placeholder="IRR" disabled defaultValue="14%" />
+                  </div>
+                </div>
+                <label htmlFor="Histori nego">Histori Negosiasi</label>
+                <textarea
+                  placeholder="Histori nego"
+                  value={negotiationHistory}
+                  onChange={(event) => setNegotiationHistory(event.target.value)}
+                />
+                <button className="primary-btn" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
+                </button>
+                {statusMessage ? <p>{statusMessage}</p> : null}
+              </form>
+            </article>
 
-        <Link className="back-link" to={`/site/${site.id}`}>
-          ← Back to profile
-        </Link>
+            <Link className="back-link" to={`/site/${site.id}`}>
+              Cancel
+            </Link>
+          </>
+        )}
       </section>
     </AppShell>
   );
