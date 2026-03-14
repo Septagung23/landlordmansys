@@ -15,7 +15,7 @@
 
 body {
   margin: 0;
-  background: #f0f0f0;
+  background: #f0f2f5;
 }
 
 .app-bg {
@@ -38,7 +38,7 @@ body {
 
 .top-bar {
   background: #fff;
-  border-bottom: 2px solid #cacaca;
+  border-bottom: 1px solid #db102a;
   display: flex;
   justify-content: space-between;
   padding: 0.65rem 0.9rem;
@@ -93,7 +93,7 @@ body {
 .site-card {
   text-decoration: none;
   color: inherit;
-  background: #d1d3d5;
+  background: #fff;
   border-radius: 10px;
   padding: 0.55rem;
   display: grid;
@@ -106,7 +106,7 @@ body {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #ececec;
+  background: #fafafa;
   border: 1px solid #d9d9d9;
 }
 
@@ -123,8 +123,8 @@ body {
 }
 
 .card {
-  background: #d3d3d3;
-  border-radius: 12px;
+  background: #f9f9f9 !important;
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -155,7 +155,7 @@ body {
   padding: 0.45rem 0.6rem;
   border-right: 1px solid #888;
   border-bottom: 1px solid #888;
-  background: #d3d3d3;
+  background: #f9f9f9;
   font-size: 0.77rem;
   min-height: 2.1rem;
 }

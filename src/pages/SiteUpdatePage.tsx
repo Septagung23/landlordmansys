@@ -103,7 +103,7 @@ export default function SiteUpdatePage() {
 
               <form className="form-grid" onSubmit={handleSubmit}>
                 <label htmlFor="Tanggal expired">Tanggal expired</label>
-                <input placeholder="Tanggal expired" defaultValue={site.contractEnd} />
+                <input placeholder="Tanggal expired" defaultValue={site.contractEnd} disabled/>
                 <label htmlFor="Harga existing">Harga existing</label>
                 <input
                   placeholder="Harga existing"

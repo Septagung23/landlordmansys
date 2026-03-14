@@ -48,7 +48,6 @@ function parseBody(req) {
     req.on('error', reject);
   });
 }
-
 const server = createServer(async (req, res) => {
   if (!req.url || !req.method) {
     send(res, 400, { message: 'Invalid request' });
