@@ -1,29 +1,101 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { apiFetch } from '../api';
+import { useAuth } from '../auth';
 import AppShell from '../components/AppShell';
 import type { Site } from '../types';
 
-const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
+type ProfileField = {
+  label: string;
+  getValue: (site: Site) => string;
+};
 
-const profileFields: Array<{ label: string; key: keyof Site }> = [
-  { label: 'Negotiator', key: 'negotiator' },
-  { label: 'Province', key: 'province' },
-  { label: 'Existing Price / year', key: 'existingPricePerYear' },
-  { label: 'New Price / year', key: 'newPricePerYear' },
-  { label: 'Tower Type', key: 'towerType' },
-  { label: 'Contract End', key: 'contractEnd' },
-  { label: 'Landlord', key: 'll' },
-  { label: 'Lat/Long', key: 'coordinates' },
-  { label: 'Negotiation History', key: 'negotiationHistory' }
-];
+const DEFAULT_IRR = '14%';
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+function formatDateTime(isoDateTime: string) {
+  const date = new Date(isoDateTime);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
+  return date.toLocaleString('id-ID', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function formatPercentage(value: number) {
+  return `${value.toFixed(2)}%`;
+}
+
+function calculateGrowth(existingPricePerYear: number, newPricePerYear: number) {
+  if (existingPricePerYear === 0) {
+    return 0;
+  }
+
+  return ((newPricePerYear - existingPricePerYear) / existingPricePerYear) * 100;
+}
 
 export default function SiteProfilePage() {
   const { siteId } = useParams();
+  const { token } = useAuth();
   const [site, setSite] = useState<Site | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const selectedSiteId = useMemo(() => siteId ?? '', [siteId]);
+  const totalNewPrice = useMemo(() => {
+    if (!site) {
+      return formatCurrency(0);
+    }
+
+    return formatCurrency(site.newPricePerYear * 5);
+  }, [site]);
+
+  const totalGrowth = useMemo(() => {
+    if (!site) {
+      return formatPercentage(0);
+    }
+
+    return formatPercentage(calculateGrowth(site.existingPricePerYear, site.newPricePerYear));
+  }, [site]);
+
+  const profileFields = useMemo<ProfileField[]>(() => {
+    if (!site) {
+      return [];
+    }
+
+    return [
+      { label: 'Negotiator', getValue: (currentSite) => currentSite.negotiator },
+      { label: 'Province', getValue: (currentSite) => currentSite.province },
+      {
+        label: 'Existing Price / year',
+        getValue: (currentSite) => formatCurrency(currentSite.existingPricePerYear)
+      },
+      {
+        label: 'New Price / year',
+        getValue: (currentSite) => formatCurrency(currentSite.newPricePerYear)
+      },
+      { label: 'Total New Price', getValue: () => totalNewPrice },
+      { label: 'Growth', getValue: () => totalGrowth },
+      { label: 'IRR', getValue: () => DEFAULT_IRR },
+      { label: 'Tower Type', getValue: (currentSite) => currentSite.towerType },
+      { label: 'Contract End', getValue: (currentSite) => currentSite.contractEnd },
+      { label: 'Landlord', getValue: (currentSite) => currentSite.ll },
+      { label: 'Lat/Long', getValue: (currentSite) => currentSite.coordinates }
+    ];
+  }, [site, totalGrowth, totalNewPrice]);
 
   useEffect(() => {
     async function fetchSiteProfile() {
@@ -37,7 +109,7 @@ export default function SiteProfilePage() {
       setErrorMessage(null);
 
       try {
-        const response = await fetch(`${apiBaseUrl}/api/sites/${selectedSiteId}`);
+        const response = await apiFetch(`/api/sites/${selectedSiteId}`, { token });
         if (!response.ok) {
           throw new Error('Failed to fetch site profile data.');
         }
@@ -52,7 +124,7 @@ export default function SiteProfilePage() {
     }
 
     fetchSiteProfile();
-  }, [selectedSiteId]);
+  }, [selectedSiteId, token]);
 
   return (
     <AppShell>
@@ -76,11 +148,43 @@ export default function SiteProfilePage() {
 
               <div className="profile-grid">
                 {profileFields.map((field) => (
-                  <div className="profile-row" key={field.key}>
+                  <div className="profile-row" key={field.label}>
                     <p className="cell label">{field.label}</p>
-                    <p className="cell">{site[field.key]}</p>
+                    <p className="cell">{field.getValue(site)}</p>
                   </div>
                 ))}
+              </div>
+            </article>
+
+            <article className="card profile-card comments-card">
+              <div className="card-head">
+                <h2>NEGOTIATION COMMENTS</h2>
+              </div>
+
+              <div className="comments-list">
+                {site.negotiationComments.length === 0 ? (
+                  <p className="empty-comments">No negotiation updates yet.</p>
+                ) : (
+                  site.negotiationComments.map((entry) => (
+                    <div className="comment-entry" key={entry.id}>
+                      <p>
+                        <strong>New Price:</strong> {formatCurrency(entry.newPricePerYear)}
+                      </p>
+                      <p>
+                        <strong>Growth:</strong> {entry.growth.toFixed(2)}%
+                      </p>
+                      <p>
+                        <strong>Negotiation History:</strong> {entry.note || '-'}
+                      </p>
+                      <p>
+                        <strong>Date Time:</strong> {formatDateTime(entry.editedAt)}
+                      </p>
+                      <p>
+                        <strong>Edited By:</strong> {entry.editedBy}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
             </article>
           </>

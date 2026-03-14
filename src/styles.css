@@ -62,6 +62,30 @@ body {
   font-size: 1.4rem;
 }
 
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.logout-btn {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1f2ce7;
+  background: #eef0ff;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+}
+
+.user-chip {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #333;
+  background: #f2f2f2;
+  border-radius: 999px;
+  padding: 0.3rem 0.6rem;
+}
+
 .content {
   padding: 1rem;
 }
@@ -88,6 +112,52 @@ body {
 .list-stack {
   display: grid;
   gap: 0.65rem;
+}
+
+.list-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.toolbar-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.toolbar-field span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #666;
+}
+
+.toolbar-field input,
+.toolbar-field select {
+  width: 100%;
+  border: 1px solid #d1d1d1;
+  border-radius: 8px;
+  padding: 0.7rem 0.75rem;
+  background: #fff;
+  font-size: 0.8rem;
+  color: #111;
+}
+
+.toolbar-field input:focus,
+.toolbar-field select:focus {
+  outline: 2px solid rgba(31, 44, 231, 0.2);
+  border-color: #1f2ce7;
+}
+
+.list-empty {
+  margin: 0;
+  padding: 0.9rem;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px dashed #cfcfcf;
+  color: #666;
+  text-align: center;
+  font-size: 0.8rem;
 }
 
 .site-card {
@@ -126,6 +196,41 @@ body {
   background: #f9f9f9 !important;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.comments-card {
+  margin-top: 0.8rem;
+}
+
+.comments-list {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.65rem;
+}
+
+.comment-entry {
+  background: #fff;
+  border: 1px solid #d7d7d7;
+  border-radius: 8px;
+  padding: 0.6rem;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.comment-entry p {
+  margin: 0;
+  font-size: 0.77rem;
+  line-height: 1.35;
+}
+
+.empty-comments {
+  margin: 0;
+  padding: 0.55rem;
+  font-size: 0.78rem;
+  color: #666;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px dashed #c8c8c8;
 }
 
 .card-head {
@@ -215,6 +320,27 @@ body {
   background: linear-gradient(180deg, #2f45ff 0%, #1f2ce7 100%);
 }
 
+.auth-card {
+  margin-top: 1rem;
+}
+
+.auth-form {
+  padding-bottom: 1rem;
+}
+
+.form-error {
+  margin: 0.4rem 0 0;
+  color: #b00020;
+  font-size: 0.75rem;
+}
+
+.hint-text {
+  text-align: center;
+  margin-top: 0.75rem;
+  font-size: 0.7rem;
+  color: #777;
+}
+
 .back-link {
   display: block;
   text-align: center;
@@ -248,5 +374,9 @@ a {
 
   .page-title {
     margin-top: 0.75rem;
+  }
+
+  .list-toolbar {
+    grid-template-columns: 1fr;
   }
 }

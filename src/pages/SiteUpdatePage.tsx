@@ -1,20 +1,21 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { apiFetch } from '../api';
+import { useAuth } from '../auth';
 import AppShell from '../components/AppShell';
 import type { Site } from '../types';
-
-const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
 export default function SiteUpdatePage() {
   const { siteId } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   const [site, setSite] = useState<Site | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [existingPricePerYear, setExistingPricePerYear] = useState(0);
   const [newPricePerYear, setNewPricePerYear] = useState(0);
-  const [negotiationHistory, setNegotiationHistory] = useState('');
+  const [negotiationNote, setNegotiationNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
@@ -23,7 +24,7 @@ export default function SiteUpdatePage() {
       try {
         setIsLoading(true);
         setLoadError(null);
-        const response = await fetch(`${apiBaseUrl}/api/sites/${siteId}`);
+        const response = await apiFetch(`/api/sites/${siteId}`, { token });
 
         if (!response.ok) {
           throw new Error('Failed to fetch site data.');
@@ -33,7 +34,7 @@ export default function SiteUpdatePage() {
         setSite(siteData);
         setExistingPricePerYear(siteData.existingPricePerYear);
         setNewPricePerYear(siteData.newPricePerYear);
-        setNegotiationHistory(siteData.negotiationHistory);
+        setNegotiationNote('');
       } catch (error) {
         setLoadError('Failed to load site data. Please check backend server status.');
       } finally {
@@ -44,7 +45,7 @@ export default function SiteUpdatePage() {
     if (siteId) {
       fetchSite();
     }
-  }, [siteId]);
+  }, [siteId, token]);
 
   const growth = useMemo(() => {
     if (existingPricePerYear === 0) {
@@ -59,16 +60,14 @@ export default function SiteUpdatePage() {
     setStatusMessage(null);
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/sites/${siteId}/lease`, {
+      const response = await apiFetch(`/api/sites/${siteId}/lease`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({
           existingPricePerYear,
           newPricePerYear,
-          negotiationHistory
-        })
+          negotiationNote
+        }),
+        token
       });
 
       if (!response.ok) {
@@ -103,7 +102,7 @@ export default function SiteUpdatePage() {
 
               <form className="form-grid" onSubmit={handleSubmit}>
                 <label htmlFor="Tanggal expired">Tanggal expired</label>
-                <input placeholder="Tanggal expired" defaultValue={site.contractEnd} disabled/>
+                <input placeholder="Tanggal expired" defaultValue={site.contractEnd} disabled />
                 <label htmlFor="Harga existing">Harga existing</label>
                 <input
                   placeholder="Harga existing"
@@ -133,8 +132,8 @@ export default function SiteUpdatePage() {
                 <label htmlFor="Histori nego">Histori Negosiasi</label>
                 <textarea
                   placeholder="Histori nego"
-                  value={negotiationHistory}
-                  onChange={(event) => setNegotiationHistory(event.target.value)}
+                  value={negotiationNote}
+                  onChange={(event) => setNegotiationNote(event.target.value)}
                 />
                 <button className="primary-btn" type="submit" disabled={isSubmitting}>
                   {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}

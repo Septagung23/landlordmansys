@@ -1,3 +1,12 @@
+export type NegotiationComment = {
+  id: string;
+  newPricePerYear: number;
+  growth: number;
+  note: string;
+  editedAt: string;
+  editedBy: string;
+};
+
 export type Site = {
   id: string;
   code: string;
@@ -10,5 +19,5 @@ export type Site = {
   newPricePerYear: number;
   contractEnd: string;
   coordinates: string;
-  negotiationHistory: string;
+  negotiationComments: NegotiationComment[];
 };
