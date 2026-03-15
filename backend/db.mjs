@@ -37,6 +37,35 @@ function getSslConfig(databaseUrl) {
   return { rejectUnauthorized: false };
 }
 
+function formatDateOnly(value) {
+  if (!value) {
+    return "";
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  return String(value).slice(0, 10);
+}
+
+function formatDateTimeIso(value) {
+  if (!value) {
+    return "";
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toISOString();
+  }
+
+  return String(value);
+}
+
 function mapRowsToSites(rows) {
   const sites = new Map();
 
@@ -52,7 +81,7 @@ function mapRowsToSites(rows) {
         province: row.province,
         existingPricePerYear: Number(row.existing_price_per_year),
         newPricePerYear: Number(row.new_price_per_year),
-        contractEnd: row.contract_end,
+        contractEnd: formatDateOnly(row.contract_end),
         coordinates: row.coordinates,
         negotiationComments: [],
       });
@@ -64,7 +93,7 @@ function mapRowsToSites(rows) {
         newPricePerYear: Number(row.comment_new_price_per_year),
         growth: Number(row.comment_growth),
         note: row.comment_note,
-        editedAt: row.comment_edited_at,
+        editedAt: formatDateTimeIso(row.comment_edited_at),
         editedBy: row.comment_edited_by,
       });
     }
@@ -86,13 +115,13 @@ async function querySites(whereClause = "", params = []) {
         s.province,
         s.existing_price_per_year,
         s.new_price_per_year,
-        to_char(s.contract_end, 'YYYY-MM-DD') as contract_end,
+        s.contract_end,
         s.coordinates,
         c.id as comment_id,
         c.new_price_per_year as comment_new_price_per_year,
         c.growth as comment_growth,
         c.note as comment_note,
-        to_char(c.edited_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as comment_edited_at,
+        c.edited_at as comment_edited_at,
         c.edited_by as comment_edited_by
       from public.sites s
       left join public.site_negotiation_comments c on c.site_id = s.id
