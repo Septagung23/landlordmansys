@@ -233,6 +233,38 @@ body {
   border: 1px dashed #c8c8c8;
 }
 
+.comments-pagination {
+  border-top: 1px solid #d8d8d8;
+  padding: 0.55rem 0.65rem 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.pagination-btn {
+  border: 1px solid #c8c8c8;
+  background: #fff;
+  color: #333;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-status {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #666;
+  font-weight: 600;
+}
+
 .card-head {
   padding: 0.5rem 0.7rem;
   border-bottom: 1px solid #a2a2a2;
