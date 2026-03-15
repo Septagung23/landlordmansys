@@ -7,7 +7,7 @@ import type { Site } from '../types';
 
 type ProfileField = {
   label: string;
-  getValue: (site: Site) => string;
+  getValue: (site: Site) => string | number;
 };
 
 const DEFAULT_IRR = '14%';
