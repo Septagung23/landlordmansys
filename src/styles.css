@@ -160,6 +160,14 @@ body {
   font-size: 0.8rem;
 }
 
+.list-pagination {
+  margin-top: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
 .site-card {
   text-decoration: none;
   color: inherit;

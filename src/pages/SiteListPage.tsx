@@ -6,6 +6,7 @@ import SiteCard from '../components/SiteCard';
 import type { Site } from '../types';
 
 type SortDirection = 'asc' | 'desc';
+const SITES_PER_PAGE = 6;
 
 export default function SiteListPage() {
   const { token } = useAuth();
@@ -14,6 +15,7 @@ export default function SiteListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [sitePage, setSitePage] = useState(1);
 
   useEffect(() => {
     async function fetchSites() {
@@ -58,6 +60,27 @@ export default function SiteListPage() {
       });
   }, [searchTerm, sites, sortDirection]);
 
+  const totalSitePages = useMemo(() => {
+    return Math.max(1, Math.ceil(visibleSites.length / SITES_PER_PAGE));
+  }, [visibleSites]);
+
+  const paginatedSites = useMemo(() => {
+    const startIndex = (sitePage - 1) * SITES_PER_PAGE;
+    const endIndex = startIndex + SITES_PER_PAGE;
+
+    return visibleSites.slice(startIndex, endIndex);
+  }, [sitePage, visibleSites]);
+
+  useEffect(() => {
+    setSitePage(1);
+  }, [searchTerm, sortDirection]);
+
+  useEffect(() => {
+    if (sitePage > totalSitePages) {
+      setSitePage(totalSitePages);
+    }
+  }, [sitePage, totalSitePages]);
+
   return (
     <AppShell>
       <section className="content">
@@ -87,14 +110,42 @@ export default function SiteListPage() {
         {isLoading ? <p>Loading sites...</p> : null}
         {!isLoading && errorMessage ? <p>{errorMessage}</p> : null}
         {!isLoading && !errorMessage ? (
-          <div className="list-stack">
-            {visibleSites.length === 0 ? (
-              <p className="list-empty">No sites match that site code.</p>
+          <>
+            <div className="list-stack">
+              {visibleSites.length === 0 ? (
+                <p className="list-empty">No sites match that site code.</p>
+              ) : null}
+              {paginatedSites.map((site) => (
+                <SiteCard key={site.id} site={site} />
+              ))}
+            </div>
+
+            {visibleSites.length > 0 ? (
+              <div className="list-pagination" aria-label="Site list pagination">
+                <button
+                  type="button"
+                  className="pagination-btn"
+                  onClick={() => setSitePage((currentPage) => Math.max(1, currentPage - 1))}
+                  disabled={sitePage === 1}
+                >
+                  Previous
+                </button>
+                <p className="pagination-status">
+                  Page {sitePage} of {totalSitePages}
+                </p>
+                <button
+                  type="button"
+                  className="pagination-btn"
+                  onClick={() =>
+                    setSitePage((currentPage) => Math.min(totalSitePages, currentPage + 1))
+                  }
+                  disabled={sitePage === totalSitePages}
+                >
+                  Next
+                </button>
+              </div>
             ) : null}
-            {visibleSites.map((site) => (
-              <SiteCard key={site.id} site={site} />
-            ))}
-          </div>
+          </>
         ) : null}
       </section>
     </AppShell>
