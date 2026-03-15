@@ -1,10 +1,6 @@
 import { createServer } from "node:http";
-import { readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { getAllSites, getSiteById, updateSiteLease } from "./db.mjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.resolve(__dirname, "../database/sites.json");
 const PORT = Number(process.env.PORT ?? 3001);
 
 const jsonHeaders = {
@@ -23,16 +19,6 @@ const users = [
   },
 ];
 
-async function readSites() {
-  const raw = await readFile(dbPath, "utf8");
-  const sites = JSON.parse(raw);
-  return sites.map(normalizeSite);
-}
-
-async function writeSites(sites) {
-  await writeFile(dbPath, `${JSON.stringify(sites, null, 2)}\n`, "utf8");
-}
-
 function calculateGrowth(existingPricePerYear, newPricePerYear) {
   if (existingPricePerYear === 0) {
     return 0;
@@ -41,39 +27,6 @@ function calculateGrowth(existingPricePerYear, newPricePerYear) {
   const value =
     ((newPricePerYear - existingPricePerYear) / existingPricePerYear) * 100;
   return Number(value.toFixed(2));
-}
-
-function normalizeSite(site) {
-  if (Array.isArray(site.negotiationComments)) {
-    return {
-      ...site,
-      negotiationComments: site.negotiationComments,
-    };
-  }
-
-  const fallbackGrowth = calculateGrowth(
-    site.existingPricePerYear,
-    site.newPricePerYear,
-  );
-  const legacyNotes =
-    typeof site.negotiationHistory === "string" ? site.negotiationHistory : "";
-  const negotiationComments = legacyNotes
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((note, index) => ({
-      id: `legacy-${site.id}-${index + 1}`,
-      newPricePerYear: site.newPricePerYear,
-      growth: fallbackGrowth,
-      note,
-      editedAt: new Date(0).toISOString(),
-      editedBy: "Legacy Data",
-    }));
-
-  return {
-    ...site,
-    negotiationComments,
-  };
 }
 
 function send(res, status, payload) {
@@ -130,6 +83,11 @@ function requireAuth(req, res) {
     return null;
   }
   return user;
+}
+
+function sendServerError(res, error) {
+  console.error(error);
+  send(res, 500, { message: "Internal server error" });
 }
 
 const server = createServer(async (req, res) => {
@@ -192,8 +150,13 @@ const server = createServer(async (req, res) => {
     if (!user) {
       return;
     }
-    const sites = await readSites();
-    send(res, 200, sites);
+
+    try {
+      const sites = await getAllSites();
+      send(res, 200, sites);
+    } catch (error) {
+      sendServerError(res, error);
+    }
     return;
   }
 
@@ -203,16 +166,20 @@ const server = createServer(async (req, res) => {
     if (!user) {
       return;
     }
-    const siteId = siteMatch[1];
-    const sites = await readSites();
-    const site = sites.find((item) => item.id === siteId);
 
-    if (!site) {
-      send(res, 404, { message: `Site ${siteId} not found` });
-      return;
+    try {
+      const siteId = siteMatch[1];
+      const site = await getSiteById(siteId);
+
+      if (!site) {
+        send(res, 404, { message: `Site ${siteId} not found` });
+        return;
+      }
+
+      send(res, 200, site);
+    } catch (error) {
+      sendServerError(res, error);
     }
-
-    send(res, 200, site);
     return;
   }
 
@@ -247,39 +214,29 @@ const server = createServer(async (req, res) => {
         return;
       }
 
-      const sites = await readSites();
-      const siteIndex = sites.findIndex((item) => item.id === siteId);
-      if (siteIndex === -1) {
+      const growth = calculateGrowth(existingPricePerYear, newPricePerYear);
+      const updatedSite = await updateSiteLease({
+        siteId,
+        existingPricePerYear,
+        newPricePerYear,
+        note,
+        editedBy: user.name,
+        growth,
+      });
+
+      if (!updatedSite) {
         send(res, 404, { message: `Site ${siteId} not found` });
         return;
       }
 
-      const growth = calculateGrowth(existingPricePerYear, newPricePerYear);
-      const newComment = {
-        id: `comment-${Date.now()}`,
-        newPricePerYear,
-        growth,
-        note,
-        editedAt: new Date().toISOString(),
-        editedBy: user.name,
-      };
-
-      const updatedSite = {
-        ...sites[siteIndex],
-        existingPricePerYear,
-        newPricePerYear,
-        negotiationComments: [
-          newComment,
-          ...(sites[siteIndex].negotiationComments ?? []),
-        ],
-      };
-
-      sites[siteIndex] = updatedSite;
-      await writeSites(sites);
-
       send(res, 200, updatedSite);
-    } catch {
-      send(res, 400, { message: "Invalid JSON body" });
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        send(res, 400, { message: "Invalid JSON body" });
+        return;
+      }
+
+      sendServerError(res, error);
     }
     return;
   }

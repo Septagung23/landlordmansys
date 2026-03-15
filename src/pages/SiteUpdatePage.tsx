@@ -5,6 +5,32 @@ import { useAuth } from '../auth';
 import AppShell from '../components/AppShell';
 import type { Site } from '../types';
 
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+function parseCurrencyInput(value: string) {
+  const digitsOnly = value.replace(/\D/g, '');
+
+  if (digitsOnly === '') {
+    return {
+      amount: 0,
+      displayValue: ''
+    };
+  }
+
+  const amount = Number(digitsOnly);
+
+  return {
+    amount,
+    displayValue: formatCurrency(amount)
+  };
+}
+
 export default function SiteUpdatePage() {
   const { siteId } = useParams();
   const navigate = useNavigate();
@@ -15,6 +41,8 @@ export default function SiteUpdatePage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [existingPricePerYear, setExistingPricePerYear] = useState(0);
   const [newPricePerYear, setNewPricePerYear] = useState(0);
+  const [existingPriceInput, setExistingPriceInput] = useState('');
+  const [newPriceInput, setNewPriceInput] = useState('');
   const [negotiationNote, setNegotiationNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -34,6 +62,8 @@ export default function SiteUpdatePage() {
         setSite(siteData);
         setExistingPricePerYear(siteData.existingPricePerYear);
         setNewPricePerYear(siteData.newPricePerYear);
+        setExistingPriceInput(formatCurrency(siteData.existingPricePerYear));
+        setNewPriceInput(formatCurrency(siteData.newPricePerYear));
         setNegotiationNote('');
       } catch (error) {
         setLoadError('Failed to load site data. Please check backend server status.');
@@ -53,6 +83,18 @@ export default function SiteUpdatePage() {
     }
     return `${(((newPricePerYear - existingPricePerYear) / existingPricePerYear) * 100).toFixed(2)}%`;
   }, [existingPricePerYear, newPricePerYear]);
+
+  function handleExistingPriceChange(value: string) {
+    const { amount, displayValue } = parseCurrencyInput(value);
+    setExistingPricePerYear(amount);
+    setExistingPriceInput(displayValue);
+  }
+
+  function handleNewPriceChange(value: string) {
+    const { amount, displayValue } = parseCurrencyInput(value);
+    setNewPricePerYear(amount);
+    setNewPriceInput(displayValue);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -106,19 +148,28 @@ export default function SiteUpdatePage() {
                 <label htmlFor="Harga existing">Harga existing</label>
                 <input
                   placeholder="Harga existing"
-                  type="number"
-                  value={existingPricePerYear}
-                  onChange={(event) => setExistingPricePerYear(Number(event.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={existingPriceInput}
+                  onChange={(event) => handleExistingPriceChange(event.target.value)}
                 />
                 <label htmlFor="Harga baru">Harga baru</label>
                 <input
                   placeholder="Harga baru"
-                  type="number"
-                  value={newPricePerYear}
-                  onChange={(event) => setNewPricePerYear(Number(event.target.value))}
+                  type="text"
+                  inputMode="numeric"
+                  value={newPriceInput}
+                  onChange={(event) => handleNewPriceChange(event.target.value)}
                 />
                 <label htmlFor="Jangka waktu sewa baru">Jangka waktu sewa baru</label>
                 <input placeholder="Jangka waktu sewa baru" defaultValue="5 tahun" />
+                <label htmlFor="Total harga baru">Total harga baru</label>
+                <input
+                  placeholder="Total harga baru"
+                  type="text"
+                  disabled
+                  value={formatCurrency(newPricePerYear * 5)}
+                />
                 <div className="split-inputs">
                   <div>
                     <label htmlFor="Growth">Growth</label>

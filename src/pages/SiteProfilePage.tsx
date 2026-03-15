@@ -174,13 +174,13 @@ export default function SiteProfilePage() {
                         <strong>Growth:</strong> {entry.growth.toFixed(2)}%
                       </p>
                       <p>
-                        <strong>Negotiation History:</strong> {entry.note || '-'}
-                      </p>
-                      <p>
                         <strong>Date Time:</strong> {formatDateTime(entry.editedAt)}
                       </p>
                       <p>
                         <strong>Edited By:</strong> {entry.editedBy}
+                      </p>
+                      <p>
+                        <strong>Negotiation History:</strong> {entry.note || '-'}
                       </p>
                     </div>
                   ))
