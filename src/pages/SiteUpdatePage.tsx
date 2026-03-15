@@ -43,6 +43,10 @@ export default function SiteUpdatePage() {
   const [newPricePerYear, setNewPricePerYear] = useState(0);
   const [existingPriceInput, setExistingPriceInput] = useState('');
   const [newPriceInput, setNewPriceInput] = useState('');
+  const [landlordAddress, setLandlordAddress] = useState('');
+  const [contact, setContact] = useState('');
+  const [oldLeaseTime, setOldLeaseTime] = useState('');
+  const [newLeaseTime, setNewLeaseTime] = useState('');
   const [negotiationNote, setNegotiationNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -64,6 +68,10 @@ export default function SiteUpdatePage() {
         setNewPricePerYear(siteData.newPricePerYear);
         setExistingPriceInput(formatCurrency(siteData.existingPricePerYear));
         setNewPriceInput(formatCurrency(siteData.newPricePerYear));
+        setLandlordAddress(siteData.landlordAddress);
+        setContact(siteData.contact);
+        setOldLeaseTime(siteData.oldLeaseTime ? String(siteData.oldLeaseTime) : '');
+        setNewLeaseTime(siteData.newLeaseTime ? String(siteData.newLeaseTime) : '');
         setNegotiationNote('');
       } catch (error) {
         setLoadError('Failed to load site data. Please check backend server status.');
@@ -107,6 +115,10 @@ export default function SiteUpdatePage() {
         body: JSON.stringify({
           existingPricePerYear,
           newPricePerYear,
+          landlordAddress,
+          contact,
+          oldLeaseTime: oldLeaseTime ? Number(oldLeaseTime) : 0,
+          newLeaseTime: newLeaseTime ? Number(newLeaseTime) : 0,
           negotiationNote
         }),
         token
@@ -169,6 +181,38 @@ export default function SiteUpdatePage() {
                   type="text"
                   disabled
                   value={formatCurrency(newPricePerYear * 5)}
+                />
+                <label htmlFor="Alamat landlord">Alamat landlord</label>
+                <input
+                  placeholder="Alamat landlord"
+                  type="text"
+                  value={landlordAddress}
+                  onChange={(event) => setLandlordAddress(event.target.value)}
+                />
+                <label htmlFor="Kontak landlord">Kontak landlord</label>
+                <input
+                  placeholder="Kontak landlord"
+                  type="text"
+                  value={contact}
+                  onChange={(event) => setContact(event.target.value)}
+                />
+                <label htmlFor="Masa sewa lama">Masa sewa lama</label>
+                <input
+                  placeholder="Masa sewa lama"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  value={oldLeaseTime}
+                  onChange={(event) => setOldLeaseTime(event.target.value)}
+                />
+                <label htmlFor="Masa sewa baru">Masa sewa baru</label>
+                <input
+                  placeholder="Masa sewa baru"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  value={newLeaseTime}
+                  onChange={(event) => setNewLeaseTime(event.target.value)}
                 />
                 <div className="split-inputs">
                   <div>

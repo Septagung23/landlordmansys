@@ -82,9 +82,13 @@ try {
           existing_price_per_year,
           new_price_per_year,
           contract_end,
-          coordinates
+          coordinates,
+          landlord_address,
+          contact,
+          old_lease_time,
+          new_lease_time
         )
-        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         on conflict (id) do update
         set code = excluded.code,
             legacy_code = excluded.legacy_code,
@@ -95,7 +99,11 @@ try {
             existing_price_per_year = excluded.existing_price_per_year,
             new_price_per_year = excluded.new_price_per_year,
             contract_end = excluded.contract_end,
-            coordinates = excluded.coordinates
+            coordinates = excluded.coordinates,
+            landlord_address = excluded.landlord_address,
+            contact = excluded.contact,
+            old_lease_time = excluded.old_lease_time,
+            new_lease_time = excluded.new_lease_time
       `,
       [
         site.id,
@@ -109,6 +117,10 @@ try {
         site.newPricePerYear,
         site.contractEnd,
         site.coordinates,
+        site.landlordAddress ?? "",
+        site.contact ?? "",
+        site.oldLeaseTime ?? 0,
+        site.newLeaseTime ?? 0,
       ],
     );
 

@@ -83,6 +83,10 @@ function mapRowsToSites(rows) {
         newPricePerYear: Number(row.new_price_per_year),
         contractEnd: formatDateOnly(row.contract_end),
         coordinates: row.coordinates,
+        landlordAddress: row.landlord_address ?? "",
+        contact: row.contact ?? "",
+        oldLeaseTime: row.old_lease_time ?? null,
+        newLeaseTime: row.new_lease_time ?? null,
         negotiationComments: [],
       });
     }
@@ -117,6 +121,10 @@ async function querySites(whereClause = "", params = []) {
         s.new_price_per_year,
         s.contract_end,
         s.coordinates,
+        s.landlord_address,
+        s.contact,
+        s.old_lease_time,
+        s.new_lease_time,
         c.id as comment_id,
         c.new_price_per_year as comment_new_price_per_year,
         c.growth as comment_growth,
@@ -147,6 +155,10 @@ export async function updateSiteLease({
   siteId,
   existingPricePerYear,
   newPricePerYear,
+  landlordAddress,
+  contact,
+  oldLeaseTime,
+  newLeaseTime,
   note,
   editedBy,
   growth,
@@ -160,11 +172,23 @@ export async function updateSiteLease({
       `
         update public.sites
         set existing_price_per_year = $2,
-            new_price_per_year = $3
+            new_price_per_year = $3,
+            landlord_address = $4,
+            contact = $5,
+            old_lease_time = $6,
+            new_lease_time = $7
         where id = $1
         returning id
       `,
-      [siteId, existingPricePerYear, newPricePerYear],
+      [
+        siteId,
+        existingPricePerYear,
+        newPricePerYear,
+        landlordAddress,
+        contact,
+        oldLeaseTime,
+        newLeaseTime,
+      ],
     );
 
     if (updateResult.rowCount === 0) {

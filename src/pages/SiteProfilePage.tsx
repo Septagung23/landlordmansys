@@ -93,6 +93,10 @@ export default function SiteProfilePage() {
       { label: 'Tower Type', getValue: (currentSite) => currentSite.towerType },
       { label: 'Contract End', getValue: (currentSite) => currentSite.contractEnd },
       { label: 'Landlord', getValue: (currentSite) => currentSite.ll },
+      { label: 'Landlord Address', getValue: (currentSite) => currentSite.landlordAddress },
+      { label: 'Contact', getValue: (currentSite) => currentSite.contact },
+      { label: 'Old Lease Time', getValue: (currentSite) => currentSite.oldLeaseTime },
+      { label: 'New Lease Time', getValue: (currentSite) => currentSite.newLeaseTime },
       { label: 'Lat/Long', getValue: (currentSite) => currentSite.coordinates }
     ];
   }, [site, totalGrowth, totalNewPrice]);
@@ -142,7 +146,7 @@ export default function SiteProfilePage() {
               <div className="card-head">
                 <h2>SITE PROFILE</h2>
                 <Link to={`/site/${site.id}/update`}>
-                  <span>Edit</span>
+                  <span>Update</span>
                 </Link>
               </div>
 

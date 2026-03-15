@@ -13,6 +13,10 @@ export const sites: Site[] = [
     newPricePerYear: 140000000,
     contractEnd: "2027-08-31",
     coordinates: "-6.2088, 106.8456",
+    landlordAddress: "",
+    contact: "",
+    oldLeaseTime: 0,
+    newLeaseTime: 0,
     negotiationComments: [
       {
         id: "site1-comment-1",
@@ -36,6 +40,10 @@ export const sites: Site[] = [
     newPricePerYear: 95000000,
     contractEnd: "2026-12-12",
     coordinates: "-6.9039, 107.6186",
+    landlordAddress: "",
+    contact: "",
+    oldLeaseTime: 0,
+    newLeaseTime: 0,
     negotiationComments: [
       {
         id: "site2-comment-1",
@@ -59,6 +67,10 @@ export const sites: Site[] = [
     newPricePerYear: 82000000,
     contractEnd: "2025-10-01",
     coordinates: "-7.2575, 112.7521",
+    landlordAddress: "",
+    contact: "",
+    oldLeaseTime: 0,
+    newLeaseTime: 0,
     negotiationComments: [
       {
         id: "site3-comment-1",
@@ -80,5 +92,9 @@ export const profileFields: Array<{ label: string; key: keyof Site }> = [
   { label: "Tower Type", key: "towerType" },
   { label: "Contract End", key: "contractEnd" },
   { label: "Landlord", key: "ll" },
+  { label: "Landlord Address", key: "landlordAddress" },
+  { label: "Contact", key: "contact" },
+  { label: "Old Lease Time", key: "oldLeaseTime" },
+  { label: "New Lease Time", key: "newLeaseTime" },
   { label: "Lat/Long", key: "coordinates" },
 ];

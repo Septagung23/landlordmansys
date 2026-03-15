@@ -194,6 +194,10 @@ const server = createServer(async (req, res) => {
       const {
         existingPricePerYear,
         newPricePerYear,
+        landlordAddress,
+        contact,
+        oldLeaseTime,
+        newLeaseTime,
         negotiationHistory,
         negotiationNote,
       } = await parseBody(req);
@@ -205,11 +209,15 @@ const server = createServer(async (req, res) => {
       if (
         typeof existingPricePerYear !== "number" ||
         typeof newPricePerYear !== "number" ||
+        typeof landlordAddress !== "string" ||
+        typeof contact !== "string" ||
+        typeof oldLeaseTime !== "number" ||
+        typeof newLeaseTime !== "number" ||
         typeof note !== "string"
       ) {
         send(res, 400, {
           message:
-            "Request body must include numeric existingPricePerYear/newPricePerYear and string negotiationNote",
+            "Request body must include numeric existingPricePerYear/newPricePerYear/oldLeaseTime/newLeaseTime and string landlordAddress/contact/negotiationNote",
         });
         return;
       }
@@ -219,6 +227,10 @@ const server = createServer(async (req, res) => {
         siteId,
         existingPricePerYear,
         newPricePerYear,
+        landlordAddress,
+        contact,
+        oldLeaseTime,
+        newLeaseTime,
         note,
         editedBy: user.name,
         growth,

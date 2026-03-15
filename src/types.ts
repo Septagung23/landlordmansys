@@ -19,5 +19,9 @@ export type Site = {
   newPricePerYear: number;
   contractEnd: string;
   coordinates: string;
+  landlordAddress: string;
+  contact: string;
+  oldLeaseTime: number;
+  newLeaseTime: number;
   negotiationComments: NegotiationComment[];
 };
