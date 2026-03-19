@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { getAllSites, getSiteById, updateSiteLease } from "./db.mjs";
+import { getAllSites, getSiteByCode, updateSiteLeaseByCode } from "./db.mjs";
 
 const PORT = Number(process.env.PORT ?? 3001);
 
@@ -168,11 +168,11 @@ const server = createServer(async (req, res) => {
     }
 
     try {
-      const siteId = siteMatch[1];
-      const site = await getSiteById(siteId);
+      const siteCode = siteMatch[1];
+      const site = await getSiteByCode(siteCode);
 
       if (!site) {
-        send(res, 404, { message: `Site ${siteId} not found` });
+        send(res, 404, { message: `Site ${siteCode} not found` });
         return;
       }
 
@@ -190,7 +190,7 @@ const server = createServer(async (req, res) => {
       return;
     }
     try {
-      const siteId = leaseMatch[1];
+      const siteCode = leaseMatch[1];
       const {
         existingPricePerYear,
         newPricePerYear,
@@ -223,8 +223,8 @@ const server = createServer(async (req, res) => {
       }
 
       const growth = calculateGrowth(existingPricePerYear, newPricePerYear);
-      const updatedSite = await updateSiteLease({
-        siteId,
+      const updatedSite = await updateSiteLeaseByCode({
+        siteCode,
         existingPricePerYear,
         newPricePerYear,
         landlordAddress,
@@ -237,7 +237,7 @@ const server = createServer(async (req, res) => {
       });
 
       if (!updatedSite) {
-        send(res, 404, { message: `Site ${siteId} not found` });
+        send(res, 404, { message: `Site ${siteCode} not found` });
         return;
       }
 

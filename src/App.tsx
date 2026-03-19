@@ -11,8 +11,8 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/" element={<SiteListPage />} />
-        <Route path="/site/:siteId" element={<SiteProfilePage />} />
-        <Route path="/site/:siteId/update" element={<SiteUpdatePage />} />
+        <Route path="/site/:siteCode" element={<SiteProfilePage />} />
+        <Route path="/site/:siteCode/update" element={<SiteUpdatePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

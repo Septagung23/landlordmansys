@@ -12,7 +12,6 @@ function formatCurrency(value: number) {
     maximumFractionDigits: 0
   }).format(value);
 }
-
 function parseCurrencyInput(value: string) {
   const digitsOnly = value.replace(/\D/g, '');
 
@@ -32,7 +31,7 @@ function parseCurrencyInput(value: string) {
 }
 
 export default function SiteUpdatePage() {
-  const { siteId } = useParams();
+  const { siteCode } = useParams();
   const navigate = useNavigate();
   const { token } = useAuth();
 
@@ -56,7 +55,7 @@ export default function SiteUpdatePage() {
       try {
         setIsLoading(true);
         setLoadError(null);
-        const response = await apiFetch(`/api/sites/${siteId}`, { token });
+        const response = await apiFetch(`/api/sites/${siteCode}`, { token });
 
         if (!response.ok) {
           throw new Error('Failed to fetch site data.');
@@ -80,10 +79,10 @@ export default function SiteUpdatePage() {
       }
     }
 
-    if (siteId) {
+    if (siteCode) {
       fetchSite();
     }
-  }, [siteId, token]);
+  }, [siteCode, token]);
 
   const growth = useMemo(() => {
     if (existingPricePerYear === 0) {
@@ -110,7 +109,7 @@ export default function SiteUpdatePage() {
     setStatusMessage(null);
 
     try {
-      const response = await apiFetch(`/api/sites/${siteId}/lease`, {
+      const response = await apiFetch(`/api/sites/${siteCode}/lease`, {
         method: 'PUT',
         body: JSON.stringify({
           existingPricePerYear,
@@ -129,7 +128,7 @@ export default function SiteUpdatePage() {
       }
 
       setStatusMessage('Lease data updated successfully.');
-      navigate(`/site/${siteId}`);
+      navigate(`/site/${siteCode}`);
     } catch {
       setStatusMessage('Failed to update lease data. Please check backend server status.');
     } finally {
@@ -237,7 +236,7 @@ export default function SiteUpdatePage() {
               </form>
             </article>
 
-            <Link className="back-link" to={`/site/${site.id}`}>
+            <Link className="back-link" to={`/site/${site.code}`}>
               Cancel
             </Link>
           </>

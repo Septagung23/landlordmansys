@@ -11,7 +11,7 @@ export function getApiBaseUrl() {
 export async function apiFetch(path: string, options: ApiFetchOptions = {}) {
   const { token, headers, ...rest } = options;
   const mergedHeaders = new Headers(headers ?? {});
-
+  console.log(apiBaseUrl)
   if (token) {
     mergedHeaders.set('Authorization', `Bearer ${token}`);
   }

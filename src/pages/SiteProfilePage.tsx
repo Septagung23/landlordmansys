@@ -4,14 +4,14 @@ import { apiFetch } from '../api';
 import { useAuth } from '../auth';
 import AppShell from '../components/AppShell';
 import type { Site } from '../types';
+import { ArrowLeft } from 'lucide-react';
 
 type ProfileField = {
     label: string;
     getValue: (site: Site) => string | number;
 };
-
 const DEFAULT_IRR = '14%';
-const COMMENTS_PER_PAGE = 3;
+const COMMENTS_PER_PAGE = 5;
 
 function formatCurrency(value: number) {
     return new Intl.NumberFormat('id-ID', {
@@ -20,7 +20,6 @@ function formatCurrency(value: number) {
         maximumFractionDigits: 0
     }).format(value);
 }
-
 function formatDateTime(isoDateTime: string) {
     const date = new Date(isoDateTime);
     if (Number.isNaN(date.getTime())) {
@@ -35,11 +34,9 @@ function formatDateTime(isoDateTime: string) {
         minute: '2-digit'
     });
 }
-
 function formatPercentage(value: number) {
     return `${value.toFixed(2)}%`;
 }
-
 function calculateGrowth(existingPricePerYear: number, newPricePerYear: number) {
     if (existingPricePerYear === 0) {
         return 0;
@@ -49,14 +46,14 @@ function calculateGrowth(existingPricePerYear: number, newPricePerYear: number) 
 }
 
 export default function SiteProfilePage() {
-    const { siteId } = useParams();
+    const { siteCode } = useParams();
     const { token } = useAuth();
     const [site, setSite] = useState<Site | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [commentPage, setCommentPage] = useState(1);
 
-    const selectedSiteId = useMemo(() => siteId ?? '', [siteId]);
+    const selectedSiteCode = useMemo(() => siteCode ?? '', [siteCode]);
 
     const totalNewPrice = useMemo(() => {
         if (!site) {
@@ -65,7 +62,6 @@ export default function SiteProfilePage() {
 
         return formatCurrency(site.newPricePerYear * 5);
     }, [site]);
-
     const totalGrowth = useMemo(() => {
         if (!site) {
             return formatPercentage(0);
@@ -102,8 +98,10 @@ export default function SiteProfilePage() {
             { label: 'New Lease Time', getValue: (currentSite) => currentSite.newLeaseTime },
             { label: 'Lat/Long', getValue: (currentSite) => currentSite.coordinates }
         ];
+
     }, [site, totalGrowth, totalNewPrice]);
 
+    //Comment Section
     const totalCommentPages = useMemo(() => {
         if (!site) {
             return 1;
@@ -111,7 +109,6 @@ export default function SiteProfilePage() {
 
         return Math.max(1, Math.ceil(site.negotiationComments.length / COMMENTS_PER_PAGE));
     }, [site]);
-
     const paginatedComments = useMemo(() => {
         if (!site) {
             return [];
@@ -125,17 +122,16 @@ export default function SiteProfilePage() {
 
     useEffect(() => {
         async function fetchSiteProfile() {
-            if (!selectedSiteId) {
-                setErrorMessage('Site id is missing in the URL.');
+            if (!selectedSiteCode) {
+                setErrorMessage('Site code is missing in the URL.');
                 setIsLoading(false);
                 return;
             }
-
             setIsLoading(true);
             setErrorMessage(null);
 
             try {
-                const response = await apiFetch(`/api/sites/${selectedSiteId}`, { token });
+                const response = await apiFetch(`/api/sites/${selectedSiteCode}`, { token });
                 if (!response.ok) {
                     throw new Error('Failed to fetch site profile data.');
                 }
@@ -151,7 +147,7 @@ export default function SiteProfilePage() {
         }
 
         fetchSiteProfile();
-    }, [selectedSiteId, token]);
+    }, [selectedSiteCode, token]);
 
     useEffect(() => {
         if (commentPage > totalCommentPages) {
@@ -163,9 +159,22 @@ export default function SiteProfilePage() {
         <AppShell>
             <section className="content">
                 {isLoading ? <p>Loading site profile...</p> : null}
-                {!isLoading && errorMessage ? <p>{errorMessage}</p> : null}
+                {!isLoading && errorMessage ? 
+                    <div className='error-msg'>
+                        <p>{errorMessage}</p> 
+                        <a href='/' className='back-home'>
+                            <ArrowLeft size={12}/>
+                            Back
+                        </a>
+                    </div>
+                : null}
+
                 {!isLoading && !errorMessage && site ? (
                     <>
+                        <a href='/' className='back-home'>
+                            <ArrowLeft size={12}/>
+                            Back
+                        </a>
                         <h1 className="page-title smaller">{site.id.toUpperCase()}</h1>
                         <p className="subtitle">
                             {site.code} | {site.legacyCode}
@@ -174,7 +183,7 @@ export default function SiteProfilePage() {
                         <article className="card profile-card">
                             <div className="card-head">
                                 <h2>SITE PROFILE</h2>
-                                <Link to={`/site/${site.id}/update`}>
+                                <Link to={`/site/${site.code}/update`}>
                                     <span>Update</span>
                                 </Link>
                             </div>
@@ -249,7 +258,7 @@ export default function SiteProfilePage() {
                     </>
                 ) : null}
 
-                {/* <Link className="primary-btn" to={`/site/${selectedSiteId}/update`}>
+                {/* <Link className="primary-btn" to={`/site/${selectedSiteCode}/update`}>
           CONTINUE TO EDIT
         </Link> */}
             </section>

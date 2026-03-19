@@ -7,7 +7,7 @@ type SiteCardProps = {
 
 export default function SiteCard({ site }: SiteCardProps) {
   return (
-    <Link className="site-card" to={`/site/${site.id}`}>
+    <Link className="site-card" to={`/site/${site.code}`}>
       <div className="site-avatar" />
       <div>
         <p className="site-title">{site.id.toUpperCase()}</p>

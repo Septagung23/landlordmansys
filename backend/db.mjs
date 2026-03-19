@@ -151,6 +151,11 @@ export async function getSiteById(siteId) {
   return sites[0] ?? null;
 }
 
+export async function getSiteByCode(siteCode) {
+  const sites = await querySites("where s.code = $1", [siteCode]);
+  return sites[0] ?? null;
+}
+
 export async function updateSiteLease({
   siteId,
   existingPricePerYear,
@@ -229,6 +234,88 @@ export async function updateSiteLease({
   }
 
   return getSiteById(siteId);
+}
+
+export async function updateSiteLeaseByCode({
+  siteCode,
+  existingPricePerYear,
+  newPricePerYear,
+  landlordAddress,
+  contact,
+  oldLeaseTime,
+  newLeaseTime,
+  note,
+  editedBy,
+  growth,
+}) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("begin");
+
+    const updateResult = await client.query(
+      `
+        update public.sites
+        set existing_price_per_year = $2,
+            new_price_per_year = $3,
+            landlord_address = $4,
+            contact = $5,
+            old_lease_time = $6,
+            new_lease_time = $7
+        where code = $1
+        returning id
+      `,
+      [
+        siteCode,
+        existingPricePerYear,
+        newPricePerYear,
+        landlordAddress,
+        contact,
+        oldLeaseTime,
+        newLeaseTime,
+      ],
+    );
+
+    if (updateResult.rowCount === 0) {
+      await client.query("rollback");
+      return null;
+    }
+
+    const siteId = updateResult.rows[0].id;
+
+    await client.query(
+      `
+        insert into public.site_negotiation_comments (
+          id,
+          site_id,
+          new_price_per_year,
+          growth,
+          note,
+          edited_at,
+          edited_by
+        )
+        values ($1, $2, $3, $4, $5, $6, $7)
+      `,
+      [
+        `comment-${randomUUID()}`,
+        siteId,
+        newPricePerYear,
+        growth,
+        note,
+        new Date().toISOString(),
+        editedBy,
+      ],
+    );
+
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  return getSiteByCode(siteCode);
 }
 
 export async function closePool() {

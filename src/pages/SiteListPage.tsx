@@ -6,7 +6,8 @@ import SiteCard from '../components/SiteCard';
 import type { Site } from '../types';
 
 type SortDirection = 'asc' | 'desc';
-const SITES_PER_PAGE = 6;
+type SearchField = 'id' | 'code' | 'legacyCode';
+const SITES_PER_PAGE = 20;
 
 export default function SiteListPage() {
   const { token } = useAuth();
@@ -14,6 +15,8 @@ export default function SiteListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchField, setSearchField] = useState<SearchField>('code');
+  const [sortField, setSortField] = useState<SearchField>('code');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [sitePage, setSitePage] = useState(1);
 
@@ -48,17 +51,36 @@ export default function SiteListPage() {
           return true;
         }
 
-        return site.code.toLowerCase().includes(normalizedSearch);
+        const candidate =
+          searchField === 'id'
+            ? site.id
+            : searchField === 'legacyCode'
+              ? site.legacyCode
+              : site.code;
+
+        return candidate.toLowerCase().includes(normalizedSearch);
       })
       .sort((leftSite, rightSite) => {
-        const comparison = leftSite.code.localeCompare(rightSite.code, undefined, {
+        const leftValue =
+          sortField === 'id'
+            ? leftSite.id
+            : sortField === 'legacyCode'
+              ? leftSite.legacyCode
+              : leftSite.code;
+        const rightValue =
+          sortField === 'id'
+            ? rightSite.id
+            : sortField === 'legacyCode'
+              ? rightSite.legacyCode
+              : rightSite.code;
+        const comparison = leftValue.localeCompare(rightValue, undefined, {
           numeric: true,
           sensitivity: 'base'
         });
 
         return sortDirection === 'asc' ? comparison : comparison * -1;
       });
-  }, [searchTerm, sites, sortDirection]);
+  }, [searchTerm, searchField, sites, sortDirection, sortField]);
 
   const totalSitePages = useMemo(() => {
     return Math.max(1, Math.ceil(visibleSites.length / SITES_PER_PAGE));
@@ -73,7 +95,7 @@ export default function SiteListPage() {
 
   useEffect(() => {
     setSitePage(1);
-  }, [searchTerm, sortDirection]);
+  }, [searchTerm, searchField, sortDirection, sortField]);
 
   useEffect(() => {
     if (sitePage > totalSitePages) {
@@ -86,23 +108,47 @@ export default function SiteListPage() {
       <section className="content">
         <div className="list-toolbar">
           <label className="toolbar-field">
-            <span>Search site code</span>
+            <span>Search</span>
             <input
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Type a site code"
+              placeholder={`Find a site`}
             />
           </label>
 
+          <label className="toolbar-field">
+            <span>Search by</span>
+            <select
+              value={searchField}
+              onChange={(event) => setSearchField(event.target.value as SearchField)}
+            >
+              <option value="id">Site Name</option>
+              <option value="code">PID</option>
+              <option value="legacyCode">Site ID</option>
+            </select>
+          </label>
+
           <label className="toolbar-field toolbar-sort">
-            <span>Sort site code</span>
+            <span>Sort by</span>
             <select
               value={sortDirection}
               onChange={(event) => setSortDirection(event.target.value as SortDirection)}
             >
               <option value="asc">A-Z</option>
               <option value="desc">Z-A</option>
+            </select>
+          </label>
+
+          <label className="toolbar-field toolbar-sort">
+            <span>Sort field</span>
+            <select
+              value={sortField}
+              onChange={(event) => setSortField(event.target.value as SearchField)}
+            >
+              <option value="id">Site Name</option>
+              <option value="code">PID</option>
+              <option value="legacyCode">Site ID</option>
             </select>
           </label>
         </div>
@@ -113,7 +159,7 @@ export default function SiteListPage() {
           <>
             <div className="list-stack">
               {visibleSites.length === 0 ? (
-                <p className="list-empty">No sites match that site code.</p>
+                <p className="list-empty">No sites match that search.</p>
               ) : null}
               {paginatedSites.map((site) => (
                 <SiteCard key={site.id} site={site} />
